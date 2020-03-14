@@ -3,7 +3,16 @@ const bcrypt = require("bcryptjs");
 
 async function createUser(user) {
   user.password = await bcrypt.hash(user.password, 10);
-  return db.insert(user).into("users");
+  return db
+    .insert(user)
+    .into("users")
+    .then(res => {
+      const id = res[0];
+      return db
+        .select("username")
+        .from("users")
+        .where({ id });
+    });
 }
 
 function find() {
@@ -19,7 +28,8 @@ function findByid(id) {
 function findBy(filter) {
   return db("users")
     .select("id", "username", "password")
-    .where(filter);
+    .where(filter)
+    .first();
 }
 
 module.exports = {
